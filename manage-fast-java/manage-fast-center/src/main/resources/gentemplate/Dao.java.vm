@@ -1,0 +1,124 @@
+package ${package}.${moduleName};
+
+import com.mf.center.common.BaseDao;
+import com.mf.center.common.Page;
+import com.mf.center.utils.SqlUtil;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+@Repository
+public class ${className}Dao extends BaseDao {
+    private StringBuilder select = new StringBuilder();
+    private StringBuilder insert = new StringBuilder();
+
+    /**
+     * @方法说明:构造方法,用于拼加SELECT-SQL及其它的初始化工作
+     **/
+    public ${className}Dao() {
+        String selectSql = "SELECT #foreach($column in $columns)T.$column.columnName#if($velocityCount != $columns.size()),#end#end FROM ${tableName} T WHERE 1=1" ;
+        select.append(selectSql);
+
+        String insertSql = "INSERT INTO ${tableName} (#foreach($column in $columns)$column.columnName#if($velocityCount != $columns.size()),#end#end) VALUES "
+                + "(#foreach($column in $columns):$column.attrname#if($velocityCount != $columns.size()),#end#end) ";
+        insert.append(insertSql);
+    }
+
+    /**
+     * @方法说明:新增记录
+     **/
+    public int save(${className} ${classname}) {
+        String sql = "REPLACE INTO ${tableName} (#foreach($column in $columns)$column.columnName#if($velocityCount != $columns.size()),#end#end) VALUES (#foreach($column in $columns)?#if($velocityCount != $columns.size()),#end#end) " ;
+        Object[] params = {#foreach ($column in $columns)${classname}.get${column.attrName}() #if($velocityCount != $columns.size()),#end #end};
+        // logger.debug(SqlUtil.showSql(sql, params));//显示SQL语句
+        return jdbcTemplate.update(sql, params);
+    }
+
+    /**
+	 * @方法说明:批量插入记录
+	 **/
+    public int[] insertBatch(List<${className}> list) {
+        return batchOperate(list, insert.toString());
+    }
+
+    /**
+     * @方法说明:新增记录并返回主键
+     **/
+    public long saveReturnKey(${className} ${classname}) {
+        return saveKey(${classname}, insert.toString(), "id");
+    }
+
+    /**
+     * @方法说明:物理删除记录(多条)
+     **/
+    public int delete(Long ids[]) {
+        String sql = "DELETE FROM ${tableName} WHERE id" + SqlUtil.ArrayToIn(ids);// 数值型ID使用ArrayToInNum
+        return jdbcTemplate.update(sql);
+    }
+
+    /**
+     * @方法说明:按ID查找单个实体
+     **/
+    public ${className} findById(Long id) {
+        StringBuilder sb = new StringBuilder(select);
+        sb.append(" AND T.ID=?");
+        return jdbcTemplate.queryForObject(sb.toString(), new Object[]{id},
+                new BeanPropertyRowMapper<>(${className}. class));
+    }
+
+    /**
+     * @方法说明:更新记录
+     **/
+    public int update(${className} ${classname}) {
+        String sql = "UPDATE ${tableName} SET #foreach($column in $columns)#if($column.columnName != $pk.columnName || $pk.extra !=
+            'auto_increment')$column.columnName=?#if($velocityCount != $columns.size()), #end#end#end WHERE ID=? " ;
+            Object[] params = {#foreach($column in $columns)#if($column.columnName != $pk.columnName || $pk.extra !=
+            'auto_increment')${classname}.get${column.attrName}(), #end#end ${classname}.getId()};
+        return jdbcTemplate.update(sql, params);
+    }
+
+    /**
+     * @方法说明:按条件查询分页列表-根据需要替换成自己的SQL
+     **/
+    public Page<${className}> queryPage(${className}Cond cond) {
+        StringBuilder sb = new StringBuilder(select);
+        sb.append(cond.getCondition());
+        // sb.append(" ORDER BY T.ID");//增加排序子句;
+        // logger.info(SqlUtil.showSql(sb.toString(),
+        // cond.getArray()));//显示SQL语句
+        return queryPage(sb.toString(), cond, ${className}. class);
+    }
+
+    /**
+     * @方法说明:按条件查询不分页列表(使用范型)-根据需要替换成自己的SQL
+     **/
+    public List<${className}> queryList(${className}Cond cond) {
+        StringBuilder sb = new StringBuilder(select);
+        sb.append(cond.getCondition());
+        return jdbcTemplate.query(sb.toString(), cond.getArray(), new BeanPropertyRowMapper<>(${className}. class));
+    }
+
+    /**
+     * @方法说明:按条件查询记录个数
+     **/
+    public int queryCount(${className}Cond cond) {
+        String countSql = "SELECT COUNT(T.ID) FROM ${tableName} T WHERE 1=1" + cond.getCondition();
+        return jdbcTemplate.queryForObject(countSql, cond.getArray(), Integer.class);
+    }
+
+    /**
+     * @方法说明:逻辑删除记录(多条)
+     **/
+    public int deleteLogic(Long ids[]) {
+        String sql = "UPDATE ${tableName} SET delete_remark = 1 WHERE ID" + SqlUtil.ArrayToIn(ids);
+        return jdbcTemplate.update(sql);
+    }
+}

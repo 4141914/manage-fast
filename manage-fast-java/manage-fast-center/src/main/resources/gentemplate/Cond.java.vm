@@ -1,0 +1,53 @@
+package ${package}.${moduleName};
+
+import com.mf.common.base.BaseCondition;
+
+/**
+ * ${comments}
+ *
+ * @author ${author}
+ * @email ${email}
+ * @date ${datetime}
+ */
+public class ${className}Cond extends BaseCondition {
+
+    /**
+     * @方法说明:拼加自定义条件;可添加新条件、属性字段,删除不用的条件、属性字段
+     **/
+    @Override
+    public void addCondition() {
+        #foreach($column in $columns)
+#if($column.attrType == 'String')
+add($column.attrname, "AND T.$column.columnName LIKE ?", 3);
+#else
+add($column.attrname, "AND T.$column.columnName = ?");
+#end
+        #end
+
+    }
+
+    //页面查询条件可以自行增减、把不用条件清理掉
+
+#foreach ($column in $columns)
+    //$column.comments
+    private $column.attrType $column.attrname;
+#end
+
+#foreach ($column in $columns)
+
+    /**
+     * 设置：${column.comments}
+     */
+    public void set${column.attrName}($column.attrType $column.attrname) {
+        this.$column.attrname = $column.attrname;
+    }
+
+    /**
+     * 获取：${column.comments}
+     */
+    public $column.attrType get${column.attrName}() {
+        return $column.attrname;
+    }
+#end
+
+}

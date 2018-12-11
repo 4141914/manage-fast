@@ -1,0 +1,51 @@
+/**
+ * ${comments} @author ${author} @email ${email} @date ${datetime}
+ */
+'use strict';
+var Mock = require('mockjs')
+var Random = Mock.Random;
+module.exports = {
+
+    'POST /api/${classname}/queryPage': function (req, res, next) {
+        var data = Mock.mock({
+            "content|16": [{
+        #foreach ($column in $columns)
+        $column.attrname:#if($column.attrType=="String") "@word(5,10)"#else "@integer(50,100)"#end#if($velocityCount != $columns.size()),#end //$column.comments
+        #end
+    }],
+            "number": '@integer(50,100)',
+            "size": 10,
+            "totalElements": 500,
+        });
+        setTimeout(function () {
+            res.json(data);
+        }, 500);
+    },
+    'POST /api/${classname}/update': function (req, res, next) {
+        setTimeout(function () {
+            res.json({});
+        }, 500);
+    },
+    'POST /api/${classname}/save': function (req, res, next) {
+        setTimeout(function () {
+            res.json({});
+        }, 500);
+    },
+    'POST /api/${classname}/queryList': function (req, res, next) {
+        var data = Mock.mock({
+            "content|10": [{
+    #foreach ($column in $columns)
+            $column.attrname:#if($column.attrType=="String") "@word(5,10)"#else "@integer(50,100)"#end#if($velocityCount != $columns.size()),#end //$column.comments
+    #end
+        }]
+        });
+        setTimeout(function () {
+            res.json(data.content);
+        }, 500);
+    },
+    'DELETE /api/${classname}/delete': function (req, res, next) {
+        setTimeout(function () {
+            res.json({});
+        }, 500);
+    },
+}

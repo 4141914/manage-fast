@@ -1,0 +1,11 @@
+升级iview
+升级vue-cli3
+
+增加后端异步事件机制
+增加接口处理时间监控机制
+增加心跳保持session
+增加websocket接收服务器的通知
+
+增加springcloud熔断，降级等机制
+
+后端shiro登录逻辑重构，按照vue支持多页方式重构登录
