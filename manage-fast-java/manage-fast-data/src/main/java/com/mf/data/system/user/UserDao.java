@@ -43,16 +43,12 @@ public class UserDao extends BaseDao {
 	 **/
 	public List<String> queryAllPerms(long id) {
 		StringBuilder sql = new StringBuilder();
-		sql.append("select m.id,m.perms from sys_user_role ur ");
+		sql.append("select m.perms from sys_user_role ur ");
 		sql.append("LEFT JOIN sys_role_menu rm on ur.role_id = rm.role_id ");
 		sql.append("LEFT JOIN sys_menu m on rm.menu_id = m.id ");
 		sql.append("where ur.user_id = ?");
 
-		List<Menu> query = jdbcTemplate.query(sql.toString(), new Object[]{id}, new BeanPropertyRowMapper<>(Menu.class));
-
-		List<String> permsList = Lists.newArrayList();
-		query.forEach(menu -> permsList.add(menu.getPerms()));
-		return permsList;
+		return jdbcTemplate.queryForList(sql.toString(), String.class, id);
 	}
 
 	/**
